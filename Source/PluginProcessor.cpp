@@ -19,7 +19,8 @@ ModuFilterAudioProcessor::ModuFilterAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
+    parameters(*this, nullptr, "Parameters", createParams())
 #endif
 {
 }
@@ -93,7 +94,7 @@ void ModuFilterAudioProcessor::changeProgramName (int index, const juce::String&
 //==============================================================================
 void ModuFilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    for (auto& filter : lowpassFilters)
+    for (auto& filter : filters)
     {
         filter.reset();
         filter.coefficients = juce::dsp::IIR::Coefficients<float>::makeLowPass(sampleRate, cutoffFrequency);
@@ -139,6 +140,10 @@ void ModuFilterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
+    auto cutoff = parameters.getRawParameterValue("cutoff")->load();
+    auto resonance = parameters.getRawParameterValue("resonance")->load();
+    auto filterTypeIndex = parameters.getRawParameterValue("filterType")->load();
+
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
     // guaranteed to be empty - they may contain garbage).
@@ -160,7 +165,7 @@ void ModuFilterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 
         for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
         {
-            channelData[sample] = lowpassFilters[channel].processSample(channelData[sample]);
+            channelData[sample] = filters[channel].processSample(channelData[sample]);
         }
     }
 }
@@ -186,6 +191,7 @@ void ModuFilterAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
     std::unique_ptr<juce::XmlElement> xml(new juce::XmlElement("ModuFilterSettings"));
 
     xml->setAttribute("cutoffFrequency", cutoffFrequency);
+    xml->setAttribute("resonance", resonance);
 
     copyXmlToBinary(*xml, destData);
 
@@ -202,6 +208,8 @@ void ModuFilterAudioProcessor::setStateInformation (const void* data, int sizeIn
     {
         cutoffFrequency = (float)xmlState->getDoubleAttribute("cutoffFrequency", 1000.0);
         setCutoffFrequency(cutoffFrequency);
+        resonance = (float)xmlState->getDoubleAttribute("resonance", 1.0);
+        setResonance(resonance);
     }
 
 }
@@ -211,4 +219,19 @@ void ModuFilterAudioProcessor::setStateInformation (const void* data, int sizeIn
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new ModuFilterAudioProcessor();
+}
+
+
+juce::AudioProcessorValueTreeState::ParameterLayout ModuFilterAudioProcessor::createParams() {
+    juce::AudioProcessorValueTreeState::ParameterLayout params;
+
+    params.add(std::make_unique<juce::AudioParameterFloat>("cutoff", "Cutoff", juce::NormalisableRange<float>(20.0f, 22000.0f, 0.01f, 0.2f), 1000.0f));
+
+    // Possibly also for resonance, depending on your requirements
+    params.add(std::make_unique<juce::AudioParameterFloat>("resonance", "Resonance", juce::NormalisableRange<float>(0.1f, 32.0f, 0.01f, 0.2f), 1.0f));
+
+    juce::StringArray filterTypes = { "LowPass", "HighPass", "BandPass" };
+    params.add(std::make_unique<juce::AudioParameterChoice>("filterType", "Filter Type", filterTypes, 0));
+
+    return params;
 }

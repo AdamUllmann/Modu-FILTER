@@ -56,14 +56,48 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    juce::AudioProcessorValueTreeState parameters;
+    static juce::AudioProcessorValueTreeState::ParameterLayout createParams();
+
+    juce::AudioProcessorValueTreeState& getParameters()
+    {
+        return parameters;
+    }
 
 
+
+    enum FilterType
+    {
+        LowPass,
+        HighPass,
+        BandPass
+    };
+
+
+
+
+    void ModuFilterAudioProcessor::setFilterType(FilterType newType)
+    {
+        currentFilterType = newType;
+        updateFilter();
+    }
 
     void updateFilter()
     {
-        for (auto& filter : lowpassFilters)
+        for (auto& filter : filters)
         {
-            filter.coefficients = juce::dsp::IIR::Coefficients<float>::makeLowPass(getSampleRate(), cutoffFrequency, resonance);
+            switch (currentFilterType)
+            {
+            case LowPass:
+                filter.coefficients = juce::dsp::IIR::Coefficients<float>::makeLowPass(getSampleRate(), cutoffFrequency, resonance);
+                break;
+            case HighPass:
+                filter.coefficients = juce::dsp::IIR::Coefficients<float>::makeHighPass(getSampleRate(), cutoffFrequency, resonance);
+                break;
+            case BandPass:
+                filter.coefficients = juce::dsp::IIR::Coefficients<float>::makeBandPass(getSampleRate(), cutoffFrequency, resonance);
+                break;
+            }
         }
     }
 
@@ -82,12 +116,14 @@ public:
 
     float getCutoffFrequency() const { return cutoffFrequency; }
     float getResonance() const { return resonance; }
+    FilterType getFilterType() const { return currentFilterType; }
 
 private:
 
-    juce::dsp::IIR::Filter<float> lowpassFilters[2];
+    juce::dsp::IIR::Filter<float> filters[2];
     float cutoffFrequency = 1000.0f;
     float resonance = 1.0f;
+    FilterType currentFilterType = LowPass;
 
 
 

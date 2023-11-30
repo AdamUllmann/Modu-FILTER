@@ -21,45 +21,71 @@ ModuFilterAudioProcessorEditor::ModuFilterAudioProcessorEditor (ModuFilterAudioP
 
     cutoffKnob.setSliderStyle(juce::Slider::RotaryVerticalDrag);
     cutoffKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
-    cutoffKnob.setRange(0.01, 22000.0, 0.01);
+    cutoffKnob.setRange(10.0, 22000.0, 0.01);
     cutoffKnob.setSkewFactorFromMidPoint(1000.0);
     cutoffKnob.setValue(audioProcessor.getCutoffFrequency());
     addAndMakeVisible(&cutoffKnob);
+    cutoffAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "cutoff", cutoffKnob);
 
     cutoffKnob.addListener(this);
 
     resonanceKnob.setSliderStyle(juce::Slider::RotaryVerticalDrag);
-    resonanceKnob.setRange(0.01, 100.0, 0.01);
+    resonanceKnob.setRange(0.01, 32.0, 0.01);
     resonanceKnob.setSkewFactorFromMidPoint(1.0);
     resonanceKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
     resonanceKnob.setValue(audioProcessor.getResonance());
-
     addAndMakeVisible(resonanceKnob);
+    resonanceAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "resonance", resonanceKnob);
+    
     resonanceKnob.addListener(this);
+
+    filterTypeButton.setButtonText("Filter Type: LowPass");
+    filterTypeButton.onClick = [this] { filterTypeButtonClicked(); };
+    addAndMakeVisible(filterTypeButton);
+    filterTypeButton.setClickingTogglesState(true);
+    filterTypeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.parameters, "filterType", filterTypeButton);
+
+
+
+
+
+    //audioProcessor.parameters.addParameterListener("cutoff", this);
+    //audioProcessor.parameters.addParameterListener("resonance", this);
+    //audioProcessor.parameters.addParameterListener("filterType", this);
+
 
 }
 
 ModuFilterAudioProcessorEditor::~ModuFilterAudioProcessorEditor()
 {
     cutoffKnob.removeListener(this);
+    resonanceKnob.removeListener(this);
 }
 
 //==============================================================================
 void ModuFilterAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    juce::ColourGradient gradient;
-    gradient.isRadial = false;
-    gradient.point1 = { 0, 0 };
-    gradient.point2 = { static_cast<float>(getWidth()), static_cast<float>(getHeight()) };
-    gradient.addColour(0.0, juce::Colours::darkgrey);
-    gradient.addColour(1.0, juce::Colours::black);
-
-    g.setGradientFill(gradient);
-    g.fillRect(getLocalBounds());
+    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
     g.setColour(juce::Colours::white);
-    g.setFont(20.0f);
-    g.drawFittedText("ModuFilter", getLocalBounds().removeFromTop(30), juce::Justification::centred, 1);
+    g.setFont(30.0f);
+
+    juce::Font modernFont("Sans-Sarif", 30.0f, juce::Font::bold);
+    g.setFont(modernFont);
+
+    juce::Rectangle<int> bounds = getLocalBounds();
+
+    juce::Colour modernColor(0xEE214780);
+
+    g.setColour(modernColor);
+    g.fillRect(bounds);
+
+    g.setColour(juce::Colours::white);
+    juce::Rectangle<float> roundedRect = bounds.toFloat().reduced(20.0f);
+    g.drawRoundedRectangle(roundedRect, 15.0f, 2.0f);
+
+    g.setColour(juce::Colours::white);
+    g.drawText("Modu-FILTER", bounds, juce::Justification::centred, true);
 }
 
 void ModuFilterAudioProcessorEditor::resized()
@@ -74,4 +100,5 @@ void ModuFilterAudioProcessorEditor::resized()
 
     cutoffKnob.setBounds(left, topCutoff, knobWidth, knobHeight);
     resonanceKnob.setBounds(left, topResonance, knobWidth, knobHeight);
+    filterTypeButton.setBounds(10, 10, 120, 30);
 }
