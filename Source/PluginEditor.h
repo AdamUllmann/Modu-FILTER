@@ -30,6 +30,10 @@ public:
         {
             audioProcessor.setCutoffFrequency(cutoffKnob.getValue());
         }
+        else if (slider == &resonanceKnob)
+        {
+            audioProcessor.setResonance(resonanceKnob.getValue());
+        }
     }
 
 private:
@@ -37,6 +41,7 @@ private:
     // access the processor object that created it.
     ModuFilterAudioProcessor& audioProcessor;
     juce::Slider cutoffKnob;
+    juce::Slider resonanceKnob;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModuFilterAudioProcessorEditor)
 };

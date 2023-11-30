@@ -58,22 +58,36 @@ public:
 
 
 
-    void ModuFilterAudioProcessor::setCutoffFrequency(float newCutoffFrequency)
+
+    void updateFilter()
     {
-        cutoffFrequency = newCutoffFrequency;
         for (auto& filter : lowpassFilters)
         {
-            filter.coefficients = juce::dsp::IIR::Coefficients<float>::makeLowPass(getSampleRate(), cutoffFrequency);
+            filter.coefficients = juce::dsp::IIR::Coefficients<float>::makeLowPass(getSampleRate(), cutoffFrequency, resonance);
         }
     }
 
-    float getCutoffFrequency() const { return cutoffFrequency; }
+    void setCutoffFrequency(float newCutoffFrequency)
+    {
+        cutoffFrequency = newCutoffFrequency;
+        updateFilter();
+    }
+    void setResonance(float newResonance)
+    {
+        resonance = newResonance;
+        updateFilter();
+    }
 
+
+
+    float getCutoffFrequency() const { return cutoffFrequency; }
+    float getResonance() const { return resonance; }
 
 private:
 
     juce::dsp::IIR::Filter<float> lowpassFilters[2];
     float cutoffFrequency = 1000.0f;
+    float resonance = 1.0f;
 
 
 

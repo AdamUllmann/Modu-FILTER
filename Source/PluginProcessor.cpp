@@ -97,6 +97,7 @@ void ModuFilterAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     {
         filter.reset();
         filter.coefficients = juce::dsp::IIR::Coefficients<float>::makeLowPass(sampleRate, cutoffFrequency);
+        updateFilter();
     }
 }
 
@@ -181,12 +182,28 @@ void ModuFilterAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+
+    std::unique_ptr<juce::XmlElement> xml(new juce::XmlElement("ModuFilterSettings"));
+
+    xml->setAttribute("cutoffFrequency", cutoffFrequency);
+
+    copyXmlToBinary(*xml, destData);
+
 }
 
 void ModuFilterAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+
+    std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
+
+    if (xmlState.get() != nullptr && xmlState->hasTagName("ModuFilterSettings"))
+    {
+        cutoffFrequency = (float)xmlState->getDoubleAttribute("cutoffFrequency", 1000.0);
+        setCutoffFrequency(cutoffFrequency);
+    }
+
 }
 
 //==============================================================================

@@ -20,14 +20,22 @@ ModuFilterAudioProcessorEditor::ModuFilterAudioProcessorEditor (ModuFilterAudioP
 
 
     cutoffKnob.setSliderStyle(juce::Slider::RotaryVerticalDrag);
-    cutoffKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-    cutoffKnob.setRange(20.0, 20000.0, 1.0);
+    cutoffKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
+    cutoffKnob.setRange(0.01, 22000.0, 0.01);
+    cutoffKnob.setSkewFactorFromMidPoint(1000.0);
     cutoffKnob.setValue(audioProcessor.getCutoffFrequency());
     addAndMakeVisible(&cutoffKnob);
 
     cutoffKnob.addListener(this);
 
-    cutoffKnob.setValue(audioProcessor.getCutoffFrequency());
+    resonanceKnob.setSliderStyle(juce::Slider::RotaryVerticalDrag);
+    resonanceKnob.setRange(0.01, 100.0, 0.01);
+    resonanceKnob.setSkewFactorFromMidPoint(1.0);
+    resonanceKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
+    resonanceKnob.setValue(audioProcessor.getResonance());
+
+    addAndMakeVisible(resonanceKnob);
+    resonanceKnob.addListener(this);
 
 }
 
@@ -39,15 +47,31 @@ ModuFilterAudioProcessorEditor::~ModuFilterAudioProcessorEditor()
 //==============================================================================
 void ModuFilterAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    juce::ColourGradient gradient;
+    gradient.isRadial = false;
+    gradient.point1 = { 0, 0 };
+    gradient.point2 = { static_cast<float>(getWidth()), static_cast<float>(getHeight()) };
+    gradient.addColour(0.0, juce::Colours::darkgrey);
+    gradient.addColour(1.0, juce::Colours::black);
 
-    g.setColour (juce::Colours::white);
-    g.setFont (15.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
+    g.setGradientFill(gradient);
+    g.fillRect(getLocalBounds());
+
+    g.setColour(juce::Colours::white);
+    g.setFont(20.0f);
+    g.drawFittedText("ModuFilter", getLocalBounds().removeFromTop(30), juce::Justification::centred, 1);
 }
 
 void ModuFilterAudioProcessorEditor::resized()
 {
-    cutoffKnob.setBounds(getLocalBounds().reduced(40));
+    auto area = getLocalBounds();
+    int knobWidth = 100;
+    int knobHeight = 100;
+
+    int left = (area.getWidth() - knobWidth) / 2;
+    int topCutoff = (area.getHeight() - 2 * knobHeight) / 3;
+    int topResonance = topCutoff * 2 + knobHeight;
+
+    cutoffKnob.setBounds(left, topCutoff, knobWidth, knobHeight);
+    resonanceKnob.setBounds(left, topResonance, knobWidth, knobHeight);
 }
