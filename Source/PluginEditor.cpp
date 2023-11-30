@@ -49,9 +49,15 @@ ModuFilterAudioProcessorEditor::ModuFilterAudioProcessorEditor (ModuFilterAudioP
 
 
 
-    //audioProcessor.parameters.addParameterListener("cutoff", this);
-    //audioProcessor.parameters.addParameterListener("resonance", this);
-    //audioProcessor.parameters.addParameterListener("filterType", this);
+
+    // LABELS
+    cutoffLabel.setText("Cutoff", juce::dontSendNotification);
+    cutoffLabel.setJustificationType(juce::Justification::centred);
+    addAndMakeVisible(cutoffLabel);
+
+    resonanceLabel.setText("Resonance", juce::dontSendNotification);
+    resonanceLabel.setJustificationType(juce::Justification::centred);
+    addAndMakeVisible(resonanceLabel);
 
 
 }
@@ -85,20 +91,27 @@ void ModuFilterAudioProcessorEditor::paint (juce::Graphics& g)
     g.drawRoundedRectangle(roundedRect, 15.0f, 2.0f);
 
     g.setColour(juce::Colours::white);
-    g.drawText("Modu-FILTER", bounds, juce::Justification::centred, true);
+    g.drawText("Modu-FILTER", bounds.removeFromTop(82), juce::Justification::horizontallyCentred, true);
 }
 
 void ModuFilterAudioProcessorEditor::resized()
 {
     auto area = getLocalBounds();
-    int knobWidth = 100;
-    int knobHeight = 100;
+    int knobWidth = 150;
+    int knobHeight = 150;
+    int space = 30;
 
-    int left = (area.getWidth() - knobWidth) / 2;
-    int topCutoff = (area.getHeight() - 2 * knobHeight) / 3;
-    int topResonance = topCutoff * 2 + knobHeight;
+    int totalWidth = 2 * knobWidth + space;
+    int startX = (area.getWidth() - totalWidth) / 2;
+    int startY = 65;
 
-    cutoffKnob.setBounds(left, topCutoff, knobWidth, knobHeight);
-    resonanceKnob.setBounds(left, topResonance, knobWidth, knobHeight);
-    filterTypeButton.setBounds(10, 10, 120, 30);
+    int labelHeight = 15;
+
+    cutoffKnob.setBounds(startX, startY + labelHeight, knobWidth, knobHeight);
+    cutoffLabel.setBounds(startX, startY, knobWidth, labelHeight);
+
+    resonanceKnob.setBounds(startX + knobWidth + space, startY + labelHeight, knobWidth, knobHeight);
+    resonanceLabel.setBounds(startX + knobWidth + space, startY, knobWidth, labelHeight);
+
+    filterTypeButton.setBounds(136, 239, 130, 30);
 }

@@ -80,5 +80,9 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> resonanceAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> filterTypeAttachment;
 
+
+    juce::Label cutoffLabel;
+    juce::Label resonanceLabel;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModuFilterAudioProcessorEditor)
 };
