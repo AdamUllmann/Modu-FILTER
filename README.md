@@ -22,7 +22,7 @@ a dynamic audio filter plugin, designed using the JUCE framework. It offers intu
 
 2. Download the ModuFilter plugin package.
 
-3. Extract the package and place the plugin files in your DAW's designated plugin folder (probably C:/Program-files/VST3).
+3. Extract the package and place the plugin files in your DAW's designated plugin folder (probably C:/Program_Files/Common_Files/VST3).
 
 4. Rescan your plugins within the DAW.
 
