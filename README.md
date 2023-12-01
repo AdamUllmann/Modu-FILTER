@@ -1,10 +1,8 @@
 # ModuFilter
 
+a dynamic audio filter plugin, designed using the JUCE framework. It offers intuitive control over filter parameters for cutoff frequency and resonance, for 3 filter types. This plugin is suitable for both live and studio applications, providing a flexible and easy-to-use interface for shaping your sound.
+
 ![Filter Interface](https://github.com/AdamUllmann/images-for-repos/blob/9e6060cdb3dbeb6528ecc844460ea204cd0dfe9e/image234234.png)
-
-## Overview
-
-ModuFilter is a dynamic audio filter plugin, designed using the JUCE framework. It offers intuitive control over filter parameters for cutoff frequency and resonance, for 3 filter types. This plugin is suitable for both live and studio applications, providing a flexible and easy-to-use interface for shaping your sound.
 
 ## Features
 
